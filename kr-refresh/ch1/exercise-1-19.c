@@ -3,12 +3,13 @@
 
 void reverse(char s[]);
 
-main()
+int main()
 {
     char test[MAXLINE] = "hello world";
     reverse(test);
 
     printf("%s\n", test);
+    return 0;
 }
 
 void reverse(char s[])

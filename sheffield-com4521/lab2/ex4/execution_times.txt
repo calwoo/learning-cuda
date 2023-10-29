@@ -1,0 +1,4 @@
+multiply_A: 4.98s
+multiply_B: 4.82s
+multiply_B_O2: 1.53s
+multiple_C: 1.45s

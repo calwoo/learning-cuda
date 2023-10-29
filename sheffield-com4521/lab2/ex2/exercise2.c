@@ -25,7 +25,7 @@ void main() {
 	}
 
 	// read data
-	for (i = 0; i< NUM_STUDENTS; i++) {
+	for (i = 0; i < NUM_STUDENTS; i++) {
 		unsigned int strlen;
 		// read forename
 		fread(&strlen, sizeof(unsigned int), 1, f);

@@ -25,6 +25,10 @@ int main()
     average = ((float) sum) / NUM_VALUES;
 
     // normalize
+    for (i = 0; i < NUM_VALUES; i++) {
+        value[i] -= average;
+    }
+
     min = value[0];
     max = value[0];
     for (i = 0; i < NUM_VALUES; i++) {

@@ -16,3 +16,7 @@ unsigned int random_uint() {
 	rseed = RANDOM_A * rseed + RANDOM_C;
 	return rseed;
 }
+
+float random_float() {
+	return (float) random_uint();
+}

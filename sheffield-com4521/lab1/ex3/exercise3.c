@@ -8,14 +8,14 @@ long long value[NUM_VALUES];
 
 int main()
 {
-    unsigned long long sum = 0;
-    long long min, max;
-    unsigned long long average = 0;
+    float sum = 0;
+    float min, max;
+    float average = 0;
     unsigned char i = 0;
     init_random();
 
     for (i = 0; i < NUM_VALUES; i++) {
-        value[i] = random_uint();
+        value[i] = random_float();
         // printf("%d %d\n", i, value[i]);
     }
 
@@ -36,9 +36,9 @@ int main()
         max = (value[i] > max) ? value[i] : max;
     }
 
-    printf("SUM=%llu\n", sum);
-    printf("AVERAGE=%u\n", average);
-    printf("MIN=%lld\n", min);
-    printf("MAX=%lld\n", max);
+    printf("SUM=%.0f\n", sum);
+    printf("AVERAGE=%.0f\n", average);
+    printf("MIN=%.0f\n", min);
+    printf("MAX=%.0f\n", max);
     return 0;
 }

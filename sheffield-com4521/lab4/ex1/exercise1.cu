@@ -5,13 +5,17 @@
 
 //The number of character in the encrypted text
 #define N 1024
+#define A 15
+#define A_INV 111
+#define B 27
+#define M 128
 
 void checkCUDAError(const char*);
 void read_encrypted_file(int*);
 
 
 /* Exercise 1.1 */
-int modulo(int a, int b){
+__device__ int modulo(int a, int b) {
 	int r = a % b;
 	r = (r < 0) ? r + b : r;
 	return r;
@@ -20,11 +24,14 @@ int modulo(int a, int b){
 __global__ void affine_decrypt(int *d_input, int *d_output)
 {
 	/* Exercise 1.2 */
+	int i = threadIdx.x;
+	d_output[i] = modulo(A_INV * (d_input[i] - B), M);
 }
 
 __global__ void affine_decrypt_multiblock(int *d_input, int *d_output)
 {
-	/* Exercise 1.8 */
+	int i = threadIdx.x + blockDim.x * blockIdx.x;
+	d_output[i] = modulo(A_INV * (d_input[i] - B), M);
 }
 
 
@@ -42,28 +49,28 @@ int main(int argc, char *argv[])
 	h_output = (int *)malloc(size);
 
 	/* Exercise 1.3: allocate device memory */
-	//cudaMalloc(???);
-	//cudaMalloc(???);
+	cudaMalloc(&d_input, size);
+	cudaMalloc(&d_output, size);
 	checkCUDAError("Memory allocation");
 
 	/* read the encryted text */
 	read_encrypted_file(h_input);
 
 	/* Exercise 1.4: copy host input to device input */
-	//cudaMemcpy(???);
+	cudaMemcpy(d_input, h_input, size, cudaMemcpyHostToDevice);
 	checkCUDAError("Input transfer to device");
 
 	/* Exercise 1.5: Configure the grid of thread blocks and run the GPU kernel */
-	//dim3 blocksPerGrid(???);
-	//dim3 threadsPerBlock(???);
-	//affine_decrypt(???);
+	dim3 blocksPerGrid(8, 1, 1);
+	dim3 threadsPerBlock(128, 1, 1);
+	affine_decrypt_multiblock<<<blocksPerGrid, threadsPerBlock>>>(d_input, d_output);
 
 	/* wait for all threads to complete */
 	cudaThreadSynchronize();
 	checkCUDAError("Kernel execution");
 
 	/* Exercise 1.6: copy the gpu output back to the host */
-	//cudaMemcpy(???);
+	cudaMemcpy(h_output, d_output, size, cudaMemcpyDeviceToHost);
 	checkCUDAError("Result transfer to host");
 
 	/* print out the result to screen */
@@ -73,8 +80,8 @@ int main(int argc, char *argv[])
 	printf("\n");
 
 	/* Exercise 1.7: free device memory */
-	//cudaFree(???);
-	//cudaFree(???);
+	cudaFree(d_input);
+	cudaFree(d_output);
 	checkCUDAError("Free memory");
 
 	/* free host buffers */

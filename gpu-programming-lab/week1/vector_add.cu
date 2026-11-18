@@ -7,6 +7,7 @@
 #include <cstdlib>
 #include <vector>
 #include <iostream>
+#include <random>
 
 // TODO: Handle CUDA API errors and report the failed operation.
 
@@ -28,6 +29,12 @@ int main(int argc, char** argv) {
 
     // Initialize host inputs with nontrivial values and compute a CPU reference.
     std::vector<float> a(n), b(n), result(n), expected(n);
+    std::mt19937 generator(42);  // Fixed seed makes results reproducible.
+    std::uniform_real_distribution<float> distribution(-1.0f, 1.0f);
+    for (int i = 0; i < n; ++i) {
+        a[i] = distribution(generator);
+        b[i] = distribution(generator);
+    }
 
     // Allocate three device arrays and copy both inputs to the device.
     float* d_a = nullptr;

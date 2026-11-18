@@ -1,0 +1,3 @@
+[submodule "gpu-programming-lab/GPU-Puzzles"]
+	path = gpu-programming-lab/GPU-Puzzles
+	url = https://github.com/srush/GPU-Puzzles.git

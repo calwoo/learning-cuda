@@ -2,13 +2,13 @@
 
 [Back to the curriculum](../README.md)
 
-**Goal:** write a correct CUDA C++ vector addition kernel and explain how the GPU assigns work to threads. Plan for approximately 8–10 hours. Finish the checks below before moving on; the schedule is a guide, not a deadline.
+**Goal:** write a correct CUDA C++ vector addition kernel and explain how the GPU assigns work to threads. Finish the checks below before moving on.
 
 ## Before starting
 
 You need access to an NVIDIA GPU, a compatible driver, the CUDA toolkit (`nvcc`), and a C++ compiler supported by that toolkit. A cloud GPU or a CUDA-enabled notebook is fine. The puzzles use Python and Numba; follow their repository's setup instructions. Verify your environment with `nvidia-smi` and `nvcc --version`, and record the GPU, driver, toolkit, and compiler versions with your results. If using a hosted notebook, save your work back to this repository.
 
-## 1. Learn the execution model (about 2 hours)
+## 1. Learn the execution model
 
 1. Read NVIDIA's [An Even Easier Introduction to CUDA](https://developer.nvidia.com/blog/even-easier-introduction-cuda/). Trace the path from host allocation through kernel execution to result checking.
 2. Read *Programming Massively Parallel Processors*, fourth edition, chapter 2, especially sections 2.2–2.7. Focus on host and device memory, kernels, threads, blocks, and grids.
@@ -16,13 +16,13 @@ You need access to an NVIDIA GPU, a compatible driver, the CUDA toolkit (`nvcc`)
 
 **Check:** Explain the difference between host and device code, what a kernel launch does, and why data must be available on the device before the kernel reads it.
 
-## 2. Watch and trace (about 1–2 hours)
+## 2. Watch and trace
 
 Watch GPU MODE lecture 2, the recap of PMPP chapters 1–3, using the [lecture materials](https://github.com/gpu-mode/lectures/tree/main/lecture_002) and the [GPU MODE channel](https://www.youtube.com/@GPUMODE). Pause to trace a one-dimensional launch by hand. For 128 threads per block and 1,000 elements, calculate the number of blocks, the global index of thread 5 in block 2, and how many launched threads have no corresponding element.
 
 **Check:** The launch needs 8 blocks, that thread has index 261, and 24 threads are beyond the end. Explain why those threads must not access the arrays.
 
-## 3. Practice indexing with GPU Puzzles (about 2 hours)
+## 3. Practice indexing with GPU Puzzles
 
 Work through [GPU Puzzles](https://github.com/srush/GPU-Puzzles) in order:
 
@@ -32,7 +32,7 @@ Work through [GPU Puzzles](https://github.com/srush/GPU-Puzzles) in order:
 
 Run the provided checks. For each puzzle, write down the global index calculation and the condition under which a thread should write. Try to solve each before consulting a solution. These exercises use Numba's CUDA model; the final exercise below uses CUDA C++.
 
-## 4. Build vector addition (about 3 hours)
+## 4. Build vector addition
 
 Create `vector_add.cu` in this directory. Implement `c[i] = a[i] + b[i]` for single-precision vectors:
 
@@ -51,7 +51,7 @@ nvcc -O2 -o vector_add vector_add.cu
 
 Allow the vector length and threads per block to be changed, through command-line arguments or a clearly documented test loop. For positive `N`, use ceiling division `(N + threads_per_block - 1) / threads_per_block` for the grid size.
 
-## 5. Test, measure, and explain (about 1 hour)
+## 5. Test, measure, and explain
 
 - [ ] Test every combination of `N = 1, 32, 33, 1024, 1025, 1000000` and 1, 32, 128, and 256 threads per block, subject to the device's supported launch limits. Record the grid size and whether each case passes.
 - [ ] Compare at least several sizes using CUDA events around the kernel, with warm-up runs and synchronization before reading elapsed time. Record the timing method and distinguish kernel time from allocation and transfer time. Treat these measurements as a baseline, not a speed target.

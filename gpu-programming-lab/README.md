@@ -11,7 +11,7 @@ Each week, budget roughly two hours for reading, one to two for lectures, three 
 ### 1. CUDA fundamentals (weeks 1–3)
 
 - **Week 1:** Study CUDA's execution model and PMPP chapter 2; complete GPU Puzzles 1–3 and write and test CUDA C++ vector addition across boundary sizes and block sizes.
-- **[Week 2](week2/README.md):** Study multidimensional grids and layout (PMPP chapter 3, GPU MODE lecture 3); complete puzzles 4–7, rectangular matrix addition, and a 3×3 blur with boundary handling.
+- **[Week 2](week2/README.md):** Study multidimensional grids and layout (PMPP chapter 3, GPU MODE lecture 3), complete puzzles 4–7, and implement rectangular matrix addition.
 - **Week 3:** Study warps, divergence, scheduling, and grid-stride loops (PMPP chapter 4, GPU MODE lectures 4–5). Experiment with block sizes and branching. **Milestone:** implement and benchmark a fused `max(0, alpha * x + b)` CUDA operator against PyTorch.
 
 ### 2. Memory and parallel algorithms (weeks 4–7)

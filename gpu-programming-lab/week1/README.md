@@ -2,7 +2,7 @@
 
 [Back to the curriculum](../README.md)
 
-**Goal:** write a correct CUDA C++ vector addition kernel and explain how the GPU assigns work to threads. Finish the checks below before moving on.
+**Goal:** Write a correct CUDA C++ vector addition kernel and explain how threads, warps, blocks, and streaming multiprocessors (SMs) execute it. Use that model to prepare for Triton in [Week 2](../week2/README.md).
 
 ## Before starting
 
@@ -11,8 +11,10 @@ You need access to an NVIDIA GPU, a compatible driver, the CUDA toolkit (`nvcc`)
 ## 1. Learn the execution model
 
 1. Read NVIDIA's [An Even Easier Introduction to CUDA](https://developer.nvidia.com/blog/even-easier-introduction-cuda/). Trace the path from host allocation through kernel execution to result checking.
-2. Read *Programming Massively Parallel Processors*, fourth edition, chapter 2, especially sections 2.2–2.7. Focus on host and device memory, kernels, threads, blocks, and grids.
-3. In your own notes, sketch a host program that allocates inputs on the device, copies data, launches a kernel, copies the result back, and releases memory.
+2. Read *Programming Massively Parallel Processors*, fourth edition, chapter 2, sections 2.1–2.7. Focus on host and device memory, kernels, threads, blocks, and grids.
+3. Read chapter 4, sections 4.1–4.6, for SIMT execution, warps, SMs, and the scheduler.
+4. Study Stanford CS149 lecture 7, *GPU Architecture and CUDA Programming*. [Stanford CS149 lectures](https://gfxcourses.stanford.edu/cs149/fall25/lecture/)
+5. In your own notes, sketch a host program that allocates inputs on the device, copies data, launches a kernel, copies the result back, and releases memory.
 
 **Check:** Explain the difference between host and device code, what a kernel launch does, and why data must be available on the device before the kernel reads it.
 
@@ -21,6 +23,10 @@ You need access to an NVIDIA GPU, a compatible driver, the CUDA toolkit (`nvcc`)
 Watch GPU MODE lecture 2, the recap of PMPP chapters 1–3, using the [lecture materials](https://github.com/gpu-mode/lectures/tree/main/lecture_002) and the [GPU MODE channel](https://www.youtube.com/@GPUMODE). Pause to trace a one-dimensional launch by hand. For 128 threads per block and 1,000 elements, calculate the number of blocks, the global index of thread 5 in block 2, and how many launched threads have no corresponding element.
 
 **Check:** The launch needs 8 blocks, that thread has index 261, and 24 threads are beyond the end. Explain why those threads must not access the arrays.
+
+For a second launch, predict how many blocks and warps cover 100,000 elements with 256 threads per block and 32 threads per warp. Check your result against 391 blocks and 3,128 warps. Explain what happens to the extra threads.
+
+Compare GPU SIMT and CPU SIMD in your notes. Explain what a warp scheduler can do when one warp is waiting on a memory load. Sketch registers and shared memory/L1 on an SM, then L2 and device DRAM (such as HBM on data center GPUs). Mark where the vector inputs live and which values a thread might hold in registers.
 
 ## 3. Practice indexing with GPU Puzzles
 
@@ -66,3 +72,5 @@ Keep the source, instructions for building and running it, correctness results, 
 - How do you compute the global index and the required number of blocks?
 - What happens when `N` is not divisible by the block size, and how does the bounds check prevent an invalid access?
 - Which operations run on the CPU and GPU, and when does data move between them?
+- How does a block break into warps, and how can an SM hide memory latency by scheduling a ready warp?
+- Which parts of the memory hierarchy are local to an SM, and which parts serve the whole GPU?

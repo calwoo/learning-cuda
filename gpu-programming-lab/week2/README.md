@@ -1,41 +1,32 @@
-# Week 2: Multidimensional indexing and memory layout
+# Week 2: Triton programs and vectorized kernels
 
 [Back to the curriculum](../README.md) · [Week 1](../week1/README.md)
 
-**Goal:** Map a 2D CUDA grid onto a row-major matrix. Write a matrix addition kernel that handles rectangular inputs and partial blocks.
+**Goal:** Use one Triton program per tile to implement and test vector addition and a fused affine transform. Explain how that mapping compares with your CUDA vector addition.
 
-## 1. Trace a 2D launch
+## 1. Learn the Triton launch model
 
-1. Read sections 3.1–3.2 of *Programming Massively Parallel Processors*, fourth edition, for grid organization and thread mapping. Read section 3.4 for another example of mapping a thread to an output element. [Chapter 3](https://www.oreilly.com/library/view/programming-massively-parallel/9780323984638/xhtml/Ch003_47-68_B9780323912310000045.xhtml)
-2. Watch Jeremy Howard's *Getting Started with CUDA for Python Programmers* and work through the lecture notebook's image examples. Trace how a thread's coordinates locate an element in a flat buffer. [GPU MODE Lecture 3](https://www.youtube.com/watch?v=4sgKnKbR-WE) · [Lecture materials](https://github.com/gpu-mode/lectures/tree/main/lecture_003)
-3. On paper, use CUDA `x` for the column and `y` for the row. For a matrix with 5 rows and 9 columns and a block of `dim3(4, 4)`, calculate the grid dimensions, the number of threads outside the matrix, and the flat offset for thread `(0, 0)` in block `(2, 1)`. Explain why the row stride depends on the number of columns.
+1. Watch GPU MODE lecture 14, *Practitioner's Guide to Triton*. [GPU MODE lectures](https://github.com/gpu-mode/lectures)
+2. Work through the vector-add tutorial. Trace how the launch grid picks a number of programs, `tl.program_id(0)` selects a tile, `tl.arange` constructs offsets inside it, and `tl.load` and `tl.store` use masks for the tail. [Triton Tutorial 1](https://triton-lang.org/main/getting-started/tutorials/01-vector-add.html)
+3. For `N = 1025` and `BLOCK_SIZE = 256`, work out the program count and the valid offsets in the last tile. Compare this with the thread and block indices in your Week 1 kernel.
 
-**Check:** The grid is `dim3(3, 2)`, 51 of the 96 launched threads are outside the matrix, and the specified thread maps to row 4, column 8, at offset 44.
+**Check:** Five programs cover the vector. The last program has one valid element at index 1,024.
 
-## 2. Complete GPU Puzzles 4–7
+## 2. Complete Triton Puzzles 1–2
 
-Open the local notebook with the **Python (cuda)** kernel. Use each puzzle's axis and array conventions. Inspect the mapping with `problem.show()` and run `problem.check()` after each solution. [GPU Puzzles notebook](../GPU-Puzzles/GPU_puzzlers.ipynb)
+Open the upstream notebook and run its setup cells. Its interpreter runs the puzzle checks on the CPU. For compiled tutorials and benchmarks, use a supported GPU environment as described in the curriculum. [Triton Puzzles notebook](https://github.com/gpu-mode/Triton-Puzzles/blob/main/Triton-Puzzles.ipynb) · [Open in Colab](https://colab.research.google.com/github/gpu-mode/Triton-Puzzles/blob/main/Triton-Puzzles.ipynb)
 
-- [ ] **4. Map 2D.** Map threads to a square matrix and guard both coordinates.
-- [ ] **5. Broadcast.** Work out which element of each input contributes to each output cell.
-- [ ] **6. Blocks.** Use the block and thread indices to compute a global index across multiple blocks.
-- [ ] **7. Blocks 2D.** Extend the multi-block mapping to both axes and guard partial blocks.
+- [ ] **1. Constant Add.** Load, add, and store a vector that fits exactly into one tile.
+- [ ] **2. Constant Add Block.** Distribute the work over multiple programs. Mask the last tile's loads and stores to cover only valid offsets.
 
-After Puzzle 7, explain what changes when the block moves one position along each axis.
+## 3. Implement and test two kernels
 
-## 3. Implement rectangular matrix addition
-
-Create `matrix_add.cu`. Reuse the allocation, copy, launch, and verification flow from Week 1.
-
-1. Store two equally sized `height × width` matrices in flat row-major arrays. Initialize them with distinct values that vary across both rows and columns so an indexing mistake shows up in the output.
-2. Start with a `16 × 16` block. Compute the grid by rounding up the width and height independently. Map one thread to each output element and check both bounds before accessing memory.
-3. Derive the flat offset from the row, column, and width. Use that offset to add the input elements and write the sum.
-4. Compare every output with a CPU reference. Report the first mismatch by row and column and return a failure status.
-
-**Test:** Use shapes `1 × 1`, `1 × 19`, `19 × 1`, `16 × 32`, and `17 × 31` (rows × columns). Explain which cases launch partial blocks.
+1. Create `vector_add.py` and implement `out = a + b` for contiguous 1D tensors with `triton.jit`. Set the grid from the vector length and block size, and mask loads and stores beyond the end.
+2. Create `affine.py` and implement `out = alpha * x + b` in one kernel, using a scalar `alpha` and a per-element bias vector `b`. Use PyTorch for the reference and choose an appropriate tolerance for floating-point rounding.
+3. Test block sizes 128, 256, 512, and 1,024. For each size, check lengths 1, one below the block size, one equal to it, one above it, and 1,025. Include a much larger input to check behavior across many programs.
 
 ## 4. Record results
 
-- [ ] Save `matrix_add.cu`, build and run commands, and a table of correctness results.
-- [ ] Use CUDA events to measure the kernel after warm-up for a few rectangular sizes, including one large enough to launch many blocks. Record the shape, block size, grid size, and kernel time separately from the copies.
-- [ ] Explain how to derive a 2D thread mapping from a rectangular shape, why the row stride is the width, and how the bounds checks handle partial blocks.
+- [ ] Save both kernels with run commands and correctness results.
+- [ ] On a supported GPU, compare tile sizes and benchmark the fused kernel against the equivalent eager PyTorch expression. Warm up each configuration and measure the operation without compilation or host transfers.
+- [ ] Explain how a Triton program instance relates to a CUDA thread block on NVIDIA. Describe the difference between elements in a Triton tile and threads executing it, and identify which loads and stores the tail mask suppresses.

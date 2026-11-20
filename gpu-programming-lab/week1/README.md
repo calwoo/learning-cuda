@@ -4,6 +4,13 @@
 
 **Goal:** Write a correct CUDA C++ vector addition kernel and explain how threads, warps, blocks, and streaming multiprocessors (SMs) execute it. Use that model to prepare for Triton in [Week 2](../week2/README.md).
 
+## Study notes
+
+- [Warp counting](warp-counting.md) works through the vector-add launch and its final partial block.
+- [SIMT versus SIMD](simt-vs-simd.md) compares CUDA threads with CPU vector instructions and explains divergence.
+- [SM scheduling](sm-scheduling.md) shows how a scheduler uses ready warps to hide latency.
+- [Memory hierarchy](memory-hierarchy.md) traces vector data from host memory through the GPU.
+
 ## Before starting
 
 You need access to an NVIDIA GPU, a compatible driver, the CUDA toolkit (`nvcc`), and a C++ compiler supported by that toolkit. A cloud GPU or a CUDA-enabled notebook is fine. The puzzles use Python and Numba; follow their repository's setup instructions. Verify your environment with `nvidia-smi` and `nvcc --version`, and record the GPU, driver, toolkit, and compiler versions with your results. If using a hosted notebook, save your work back to this repository.

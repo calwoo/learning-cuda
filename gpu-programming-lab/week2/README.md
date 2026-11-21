@@ -14,16 +14,28 @@
 
 ## 2. Complete Triton Puzzles 1–2
 
-Open the upstream notebook and run its setup cells. Its interpreter runs the puzzle checks on the CPU. For compiled tutorials and benchmarks, use a supported GPU environment as described in the curriculum. [Triton Puzzles notebook](https://github.com/gpu-mode/Triton-Puzzles/blob/main/Triton-Puzzles.ipynb) · [Open in Colab](https://colab.research.google.com/github/gpu-mode/Triton-Puzzles/blob/main/Triton-Puzzles.ipynb)
+Open the upstream notebook in Colab and run its setup cells. The notebook uses an interpreter for puzzle checks and includes a visualization dependency. The standalone checks below run directly in the local `cuda` environment. [Triton Puzzles notebook](https://github.com/gpu-mode/Triton-Puzzles/blob/main/Triton-Puzzles.ipynb) · [Open in Colab](https://colab.research.google.com/github/gpu-mode/Triton-Puzzles/blob/main/Triton-Puzzles.ipynb)
 
 - [ ] **1. Constant Add.** Load, add, and store a vector that fits exactly into one tile.
 - [ ] **2. Constant Add Block.** Distribute the work over multiple programs. Mask the last tile's loads and stores to cover only valid offsets.
 
 ## 3. Implement and test two kernels
 
-1. Create `vector_add.py` and implement `out = a + b` for contiguous 1D tensors with `triton.jit`. Set the grid from the vector length and block size, and mask loads and stores beyond the end.
-2. Create `affine.py` and implement `out = alpha * x + b` in one kernel, using a scalar `alpha` and a per-element bias vector `b`. Use PyTorch for the reference and choose an appropriate tolerance for floating-point rounding.
-3. Test block sizes 128, 256, 512, and 1,024. For each size, check lengths 1, one below the block size, one equal to it, one above it, and 1,025. Include a much larger input to check behavior across many programs.
+1. Fill in [vector_add.py](vector_add.py) to compute `out = a + b` for contiguous 1D tensors. The runner sets the grid from the vector length and block size. Use `tl.program_id` to find this program's tile, then mask loads and stores beyond the end.
+2. Fill in [affine.py](affine.py) to compute `out = alpha * x + b` in one kernel, using a scalar `alpha` and a per-element bias vector `b`.
+3. Run [check.py](check.py) against the PyTorch references. It checks block sizes 128, 256, 512, and 1,024 with tiny inputs, partial tiles, exact multiples, and a larger case.
+
+Run these commands in PowerShell from the repository root. The local `cuda` environment uses CPU PyTorch 2.14.0 and `triton-windows` 3.8.0.post29 for these checks. [Triton Windows setup](https://github.com/triton-lang/triton-windows)
+
+```powershell
+conda activate cuda
+cd gpu-programming-lab/week2
+$env:TRITON_INTERPRET = '1'
+python -B check.py vector_add
+python -B check.py affine
+```
+
+Both checks should fail until you fill in the kernel bodies. In a compatible Linux GPU environment with CUDA-enabled PyTorch and Triton, clear `TRITON_INTERPRET` and pass `--device cuda` to run the same checks on the GPU.
 
 ## 4. Record results
 
